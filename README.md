@@ -7,7 +7,6 @@ Victim:
 	Technologies:
 	
 		Python 3.8.8
-		
 		scapy 2.4.5rc1
 		
 	To Run:
@@ -20,7 +19,6 @@ Server:
 	Technologies:
 	
 		Python 3.8.6
-		
 		scapy 2.4.4
 		
 	To Run:
