@@ -5,11 +5,12 @@ import codecs
 import sys
 
 
-def fileToBinary():
+def fileToDecimal():
     file = open('testFile.txt')
     content = file.read() 
     file.close()
     binary_of_file_content = ' '.join(format(ord(x), 'b') for x in content)
+    
 
     #splitting it to a list
     list_of_binary = binary_of_file_content.split()
@@ -17,41 +18,34 @@ def fileToBinary():
     while i < len(list_of_binary): 
         while len(list_of_binary[i]) < 8:
             list_of_binary[i] = "0" + list_of_binary[i]
-        # replace the 0s with 8s so that we can save them as ints and 
-        #    send it as the source port
-        list_of_binary[i] = list_of_binary[i].replace("0", "8") 
         i += 1 
+    print(list_of_binary)
+    finished_decimal_list = []
+    j = 0
+    while j < len(list_of_binary): 
+        if (j % 2) == 0:
+            temp = int(list_of_binary[j] + list_of_binary[j+1], 2)
+            finished_decimal_list.append(temp)
+        j += 1 
 
-    return list_of_binary
+    print(finished_decimal_list)  
+    return finished_decimal_list
 
 
 
 def main():
-
-    list_of_binary = fileToBinary()
+    list_of_decimal = fileToDecimal()
 
     sourceIP = "192.168.30.128"
     destinationIP = "192.168.30.129"
 
-    for i in list_of_binary:
-        #split the bits into two
-        first_half = i[0:4]
-        second_half = i[4:9]
-        #print(first_half)
-        #print(second_half)
-        #create and send the packet 1
-        first_half_packet = IP()/TCP(dport=5433, sport=int(first_half))
-        first_half_packet.src = sourceIP
-        first_half_packet.dst = destinationIP
-        print(first_half_packet.summary())
-        send(first_half_packet)
-
-        #create and send the packet 2
-        second_half_packet = IP()/TCP(dport=5433, sport=int(second_half))
-        second_half_packet.src = sourceIP
-        second_half_packet.dst = destinationIP
-        print(second_half_packet.summary())
-        send(second_half_packet)
+    for i in list_of_decimal:
+        #create and send the packets
+        packet = IP()/TCP(dport=5433, sport=int(i))
+        packet.src = sourceIP
+        packet.dst = destinationIP
+        print(packet.summary())
+        send(packet)
 
 if __name__ == "__main__":
     main()
