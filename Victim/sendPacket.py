@@ -24,7 +24,12 @@ def fileToDecimal():
     j = 0
     while j < len(list_of_binary): 
         if (j % 2) == 0:
-            temp = int(list_of_binary[j] + list_of_binary[j+1], 2)
+            if j+1 < len(list_of_binary):
+                #if the number of characters is even
+                temp = int(list_of_binary[j] + list_of_binary[j+1], 2)
+            else:
+                #if the number of characters is odd
+                temp = int(list_of_binary[j] + "00000000", 2)
             finished_decimal_list.append(temp)
         j += 1 
 
