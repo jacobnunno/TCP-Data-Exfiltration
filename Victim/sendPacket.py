@@ -6,11 +6,17 @@ import sys
 
 
 def fileToDecimal():
-    file = open('testFile.txt')
-    content = file.read() 
-    file.close()
-    binary_of_file_content = ' '.join(format(ord(x), 'b') for x in content)
-    
+    fname = 'testFile.txt'
+    try:
+        file = open(fname)
+    except OSError:
+        print("Could not open/read file: {}".format(fname))
+        sys.exit()
+
+    with file:
+        content = file.read()
+        file.close()
+        binary_of_file_content = ' '.join(format(ord(x), 'b') for x in content)
 
     #splitting it to a list
     list_of_binary = binary_of_file_content.split()
@@ -19,7 +25,7 @@ def fileToDecimal():
         while len(list_of_binary[i]) < 8:
             list_of_binary[i] = "0" + list_of_binary[i]
         i += 1 
-    print(list_of_binary)
+    #print(list_of_binary)
     finished_decimal_list = []
     j = 0
     while j < len(list_of_binary): 
@@ -33,7 +39,7 @@ def fileToDecimal():
             finished_decimal_list.append(temp)
         j += 1 
 
-    print(finished_decimal_list)  
+    #print(finished_decimal_list)  
     return finished_decimal_list
 
 
