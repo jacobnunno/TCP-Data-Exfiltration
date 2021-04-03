@@ -10,6 +10,7 @@ import re
 start_packet_received = False
 
 def stopfilter(x):
+    #reason for the snifer to stop. Stops the second time is sees port 32768
     global start_packet_received
     if x[TCP].sport == 32768:
         if start_packet_received:
@@ -17,12 +18,12 @@ def stopfilter(x):
         else:
             start_packet_received = True
             return False
-
     else:
         return False
 
 
 def readPcapFile(pcap_file):
+    #read the pcap file
     result = subprocess.run(["tshark", "-r", "{}".format(pcap_file)], stdout=subprocess.PIPE)
     lines = (result.stdout.decode('utf-8')).splitlines()
     print("Frist 10 Packets Received:")
@@ -31,25 +32,27 @@ def readPcapFile(pcap_file):
     line_counter = 0
     amount_of_incoming_packets = 0
 
+    #Go through the file line by line
     for i in lines:
+        #print the first 10 lines
         if line_counter < 10:
             print(i)
+        #extract the source port with the use of regex
         if line_counter != 0 and line_counter != 1 and line_counter != len(lines):
             substring = "TCP Retransmission"
             if substring in i:
                 #if it is a retransmission
                 result = re.search('Retransmission] (.*) →', i)
                 tcp_source_port = result.group(1)
-                #print("source port = {}".format(tcp_source_port))
                 decimal_list.append(tcp_source_port)
             else:
                 #if there it is not a retransmission
                 result = re.search('TCP 60 (.*) →', i)
                 tcp_source_port = result.group(1)
-                #print("source port = {}".format(tcp_source_port))
                 if tcp_source_port != "32768":
                     decimal_list.append(tcp_source_port)
         elif line_counter == 1:
+            #if it is the second packet, then we know that it is the amount of packets to be sent
             result = re.search('TCP 60 (.*) →', i)
             amount_of_incoming_packets = result.group(1)
             is_first_packet = 1
@@ -59,11 +62,12 @@ def readPcapFile(pcap_file):
 
 def receiver_tcp(tcp_ip, tcp_port, amount_of_packets_captured, echo=True, buffer_size=4096):
     src_ip = "192.168.30.128"
-
-    #pkts = sniff(filter="tcp and dst {} and src {}".format(tcp_ip, src_ip), count=amount_of_packets_captured)
+    #start sniffer
     pkts = sniff(filter="tcp and dst {} and src {}".format(tcp_ip, src_ip), stop_filter=stopfilter)
     my_pcap = PcapWriter("capture.pcap")
+    #write to file
     my_pcap.write(pkts)
+    #print the packets that are being sent
     print(pkts)
     my_pcap.close()
 
@@ -73,7 +77,6 @@ def main():
     receiver_tcp("192.168.30.129", 5443, number_of_packets)
     decimal_list, expected_amount_of_packets, amount_of_packets_received = readPcapFile("capture.pcap")
 
-    #print(decimal_list)
     #convert decimal to binary
     binary_list = []
     i = 0
@@ -86,15 +89,10 @@ def main():
     j = 0
 
     #ADD the leading 0S
-
     while j < len(binary_list): 
         while len(binary_list[j]) < 16:
             binary_list[j] = "0" + binary_list[j]
         j += 1
-
-    #print(binary_list)  
-    print("Expected amount of packets: {}".format(expected_amount_of_packets))
-    print("Actual amount of packets: {}".format(amount_of_packets_received))
 
     #split each binary string into 2 strings, so 2 characters
     finished_binary_list = []
@@ -105,7 +103,6 @@ def main():
         finished_binary_list.append(secondpart)
         k += 1
 
-
     ascii_string = ""
 
     #convert binary to ascii
@@ -114,6 +111,9 @@ def main():
         ascii_character = chr(an_integer)
         ascii_string += ascii_character
 
+    #print results
+    print("Expected amount of packets: {}".format(expected_amount_of_packets))
+    print("Actual amount of packets: {}".format(amount_of_packets_received))
     print("Data Received:")
     print(ascii_string)
 
