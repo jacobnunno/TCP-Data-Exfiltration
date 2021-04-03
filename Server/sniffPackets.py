@@ -11,24 +11,33 @@ def readPcapFile(pcap_file):
     print("text file output:")
 
     decimal_list = []
+    line_counter = 0
+    amount_of_incoming_packets = 0
 
     for i in lines:
         print(i)
-        substring = "TCP Retransmission"
-        if substring in i:
-            #if it is a retransmission
-            x = i.split("Retransmission] ")
-            tcp_source_port = (x[1])[0 : 5]
-            #print("source port = {}".format(tcp_source_port))
-            decimal_list.append(tcp_source_port)
-        else:
-            #if there it is not a retransmission
+        if line_counter != 0 and line_counter != 1 and line_counter != len(lines):
+            substring = "TCP Retransmission"
+            if substring in i:
+                #if it is a retransmission
+                x = i.split("Retransmission] ")
+                tcp_source_port = (x[1])[0 : 5]
+                #print("source port = {}".format(tcp_source_port))
+                decimal_list.append(tcp_source_port)
+            else:
+                #if there it is not a retransmission
+                x = i.split("TCP 60 ")
+                tcp_source_port = (x[1])[0 : 5]
+                #print("source port = {}".format(tcp_source_port))
+                if tcp_source_port != "32768":
+                    decimal_list.append(tcp_source_port)
+        elif line_counter == 1:
             x = i.split("TCP 60 ")
-            tcp_source_port = (x[1])[0 : 5]
-            #print("source port = {}".format(tcp_source_port))
-            decimal_list.append(tcp_source_port)
+            amount_of_incoming_packets = (x[1])[0 : 1]
+            is_first_packet = 1
+        line_counter += 1
 
-    return decimal_list
+    return decimal_list, amount_of_incoming_packets
 
 def receiver_tcp(tcp_ip, tcp_port, amount_of_packets_captured, echo=True, buffer_size=4096):
     src_ip = "192.168.30.128"
@@ -41,11 +50,11 @@ def receiver_tcp(tcp_ip, tcp_port, amount_of_packets_captured, echo=True, buffer
 
 def main():
     print("are we going to find TCP packets? lets see:")
-    number_of_packets = 4
+    number_of_packets = 100
     receiver_tcp("192.168.30.129", 5443, number_of_packets)
-    decimal_list = readPcapFile("capture.pcap")
+    decimal_list, amount_of_incoming_packets = readPcapFile("capture.pcap")
 
-    print(decimal_list)
+    #print(decimal_list)
     #convert decimal to binary
     binary_list = []
     i = 0
@@ -57,7 +66,7 @@ def main():
 
     j = 0
 
-    #ad the leading 0s
+    #ADD the leading 0S
 
     while j < len(binary_list): 
         while len(binary_list[j]) < 16:
@@ -65,6 +74,7 @@ def main():
         j += 1
 
     print(binary_list)  
+    print("Expected amount of packets: {}".format(amount_of_incoming_packets))
 
     #split each binary string into 2 strings, so 2 characters
     finished_binary_list = []
@@ -83,7 +93,6 @@ def main():
         an_integer = int(binary_list_item, 2)
         ascii_character = chr(an_integer)
         ascii_string += ascii_character
-
 
     print(ascii_string)
 

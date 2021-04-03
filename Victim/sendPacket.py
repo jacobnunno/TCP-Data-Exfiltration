@@ -37,12 +37,25 @@ def fileToDecimal():
     return finished_decimal_list
 
 
-
 def main():
     list_of_decimal = fileToDecimal()
 
     sourceIP = "192.168.30.128"
     destinationIP = "192.168.30.129"
+
+    #initial packet sent with port 32768 to signal the start of the data transfer
+    first_packet = IP()/TCP(dport=5433, sport=32768)
+    first_packet.src = sourceIP
+    first_packet.dst = destinationIP
+    print(first_packet.summary())
+    send(first_packet)
+
+    #second packet sent with port set to the amount of packets being sent
+    second_packet = IP()/TCP(dport=5433, sport=len(list_of_decimal))
+    second_packet.src = sourceIP
+    second_packet.dst = destinationIP
+    print(second_packet.summary())
+    send(second_packet)
 
     for i in list_of_decimal:
         #create and send the packets
@@ -51,6 +64,14 @@ def main():
         packet.dst = destinationIP
         print(packet.summary())
         send(packet)
+
+    #End packet sent with port 32768 to signal the end of the data transfer
+    last_packet = IP()/TCP(dport=5433, sport=32768)
+    last_packet.src = sourceIP
+    last_packet.dst = destinationIP
+    print(last_packet.summary())
+    send(last_packet)
+
 
 if __name__ == "__main__":
     main()
