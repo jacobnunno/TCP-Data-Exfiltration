@@ -60,7 +60,7 @@ def readPcapFile(pcap_file):
     # subtract 3 for the first and last and the expected amount packet
     return decimal_list, amount_of_incoming_packets, line_counter - 3
 
-def receiver_tcp(tcp_ip, tcp_port, amount_of_packets_captured, echo=True, buffer_size=4096):
+def receiver_tcp(tcp_ip, tcp_port, echo=True, buffer_size=4096):
     src_ip = "192.168.30.128"
     #start sniffer
     pkts = sniff(filter="tcp and dst {} and src {}".format(tcp_ip, src_ip), stop_filter=stopfilter)
@@ -73,8 +73,7 @@ def receiver_tcp(tcp_ip, tcp_port, amount_of_packets_captured, echo=True, buffer
 
 def main():
     print("Packet Sniffer Started")
-    number_of_packets = 100
-    receiver_tcp("192.168.30.129", 5443, number_of_packets)
+    receiver_tcp("192.168.30.129", 5443)
     decimal_list, expected_amount_of_packets, amount_of_packets_received = readPcapFile("capture.pcap")
 
     #convert decimal to binary
@@ -85,9 +84,7 @@ def main():
         binary_list.append(temp)
         i += 1 
 
-
     j = 0
-
     #ADD the leading 0S
     while j < len(binary_list): 
         while len(binary_list[j]) < 16:
