@@ -1,4 +1,7 @@
  #! /usr/bin/env python3
+ #Author: Giacomo Nunno
+
+ 
 import socket
 import pcapy as p
 from scapy.all import sniff, PcapWriter
