@@ -5,8 +5,8 @@ import codecs
 import sys
 import time
 
-def fileToDecimal():
-    fname = 'testFile.txt'
+def fileToDecimal(filename):
+    fname = filename
     #open file
     try:
         file = open(fname)
@@ -22,13 +22,15 @@ def fileToDecimal():
 
     #splitting it to a list
     list_of_binary = binary_of_file_content.split()
+
     #add leading 0s to the binary
     i = 0
     while i < len(list_of_binary): 
         while len(list_of_binary[i]) < 8:
             list_of_binary[i] = "0" + list_of_binary[i]
         i += 1 
-    
+    #print("List of binary: \n {}".format(list_of_binary))
+
     #combine 2 characters per packet and 
     #convert the binary to decimal
     finished_decimal_list = []
@@ -43,53 +45,44 @@ def fileToDecimal():
                 temp = int(list_of_binary[j] + "00000000", 2)
             finished_decimal_list.append(temp)
         j += 1 
-
-    #print(finished_decimal_list)  
+    
+    #print("List of decimal: \n {}".format(finished_decimal_list))  
     return finished_decimal_list
 
+def sendpacket(source_IP, dst_IP, src_port, dst_port=5433):
+    packet = IP()/TCP(dport=dst_port, sport=src_port)
+    packet.src = source_IP
+    packet.dst = dst_IP
+    print(packet.summary())
+    send(packet)
 
 def main():
     #creates the list of source ports to send
-    list_of_decimal = fileToDecimal()
-    #seconds between 3 packets
-    packet_timeout = 15
-
+    list_of_decimal = fileToDecimal('testFile.txt')
     sourceIP = "192.168.30.128"
     destinationIP = "192.168.30.129"
+    #seconds between 3 packets
+    packet_timeout = 1
 
     #initial packet sent with port 32768 to signal the start of the data transfer
-    first_packet = IP()/TCP(dport=5433, sport=32768)
-    first_packet.src = sourceIP
-    first_packet.dst = destinationIP
-    print(first_packet.summary())
-    send(first_packet)
+    sendpacket(sourceIP, destinationIP, 32768)
 
     #second packet sent with port set to the amount of packets being sent
-    second_packet = IP()/TCP(dport=5433, sport=len(list_of_decimal))
-    second_packet.src = sourceIP
-    second_packet.dst = destinationIP
-    print(second_packet.summary())
-    send(second_packet)
+    length_of_decimal = int(len(list_of_decimal))
+    sendpacket(sourceIP, destinationIP, length_of_decimal)
+    
+    #loop through and send packets, pause every 3rd packet
     packet_counter = 2
-
     for i in list_of_decimal:
         #create and send the packets one by one
-        packet = IP()/TCP(dport=5433, sport=int(i))
-        packet.src = sourceIP
-        packet.dst = destinationIP
-        print(packet.summary())
-        send(packet)
+        sendpacket(sourceIP, destinationIP, int(i))
         packet_counter += 1
         if packet_counter == 3:
             time.sleep(packet_timeout)
             packet_counter = 0
 
     #Last packet sent with port 32768 to signal the end of the data transfer
-    last_packet = IP()/TCP(dport=5433, sport=32768)
-    last_packet.src = sourceIP
-    last_packet.dst = destinationIP
-    print(last_packet.summary())
-    send(last_packet)
+    sendpacket(sourceIP, destinationIP, 32768)
 
 
 if __name__ == "__main__":
