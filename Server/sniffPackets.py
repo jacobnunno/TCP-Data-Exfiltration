@@ -22,7 +22,7 @@ def stopfilter(x):
         return False
 
 
-def readPcapFile(pcap_file):
+def read_pcap_file(pcap_file):
     #read the pcap file
     result = subprocess.run(["tshark", "-r", "{}".format(pcap_file)], stdout=subprocess.PIPE)
     lines = (result.stdout.decode('utf-8')).splitlines()
@@ -112,7 +112,7 @@ def convert_sourceport_to_string(decimal_list):
 def main():
     print("Packet Sniffer Started")
     pcap_file_name = receiver_tcp("192.168.30.129", 5443)
-    decimal_list, expected_amount_of_packets, amount_of_packets_received = readPcapFile(pcap_file_name)
+    decimal_list, expected_amount_of_packets, amount_of_packets_received = read_pcap_file(pcap_file_name)
     ascii_string = convert_sourceport_to_string(decimal_list)
 
     #print results
