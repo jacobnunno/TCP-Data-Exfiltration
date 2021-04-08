@@ -26,7 +26,7 @@ def readPcapFile(pcap_file):
     #read the pcap file
     result = subprocess.run(["tshark", "-r", "{}".format(pcap_file)], stdout=subprocess.PIPE)
     lines = (result.stdout.decode('utf-8')).splitlines()
-    print("Frist 10 Packets Received:")
+    print("First 10 Packets Received:")
 
     decimal_list = []
     line_counter = 0
@@ -44,7 +44,8 @@ def readPcapFile(pcap_file):
                 #if it is a retransmission
                 result = re.search('Retransmission] (.*) →', i)
                 tcp_source_port = result.group(1)
-                decimal_list.append(tcp_source_port)
+                if tcp_source_port != "32768":
+                    decimal_list.append(tcp_source_port)
             else:
                 #if there it is not a retransmission
                 result = re.search('TCP 60 (.*) →', i)
@@ -62,20 +63,18 @@ def readPcapFile(pcap_file):
 
 def receiver_tcp(tcp_ip, tcp_port, echo=True, buffer_size=4096):
     src_ip = "192.168.30.128"
+    temp_file_name = "capture.pcap"
     #start sniffer
     pkts = sniff(filter="tcp and dst {} and src {}".format(tcp_ip, src_ip), stop_filter=stopfilter)
-    my_pcap = PcapWriter("capture.pcap")
+    my_pcap = PcapWriter(temp_file_name)
     #write to file
     my_pcap.write(pkts)
     #print the packets that are being sent
     print(pkts)
     my_pcap.close()
+    return temp_file_name
 
-def main():
-    print("Packet Sniffer Started")
-    receiver_tcp("192.168.30.129", 5443)
-    decimal_list, expected_amount_of_packets, amount_of_packets_received = readPcapFile("capture.pcap")
-
+def convert_sourceport_to_string(decimal_list):
     #convert decimal to binary
     binary_list = []
     i = 0
@@ -107,10 +106,20 @@ def main():
         an_integer = int(binary_list_item, 2)
         ascii_character = chr(an_integer)
         ascii_string += ascii_character
+    return ascii_string
+
+
+def main():
+    print("Packet Sniffer Started")
+    pcap_file_name = receiver_tcp("192.168.30.129", 5443)
+    decimal_list, expected_amount_of_packets, amount_of_packets_received = readPcapFile(pcap_file_name)
+    ascii_string = convert_sourceport_to_string(decimal_list)
 
     #print results
     print("Expected amount of packets: {}".format(expected_amount_of_packets))
     print("Actual amount of packets: {}".format(amount_of_packets_received))
+    if int(expected_amount_of_packets) != int(amount_of_packets_received):
+        print("Expected amount and actual amount differ.  Packets have been lost.")
     print("Data Received:")
     print(ascii_string)
 
