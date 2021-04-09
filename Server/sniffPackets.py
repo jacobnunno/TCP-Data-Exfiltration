@@ -1,7 +1,7 @@
  #! /usr/bin/env python3
  #Author: Giacomo Nunno
 
- 
+
 import socket
 import pcapy as p
 from scapy.all import sniff, PcapWriter
@@ -114,7 +114,8 @@ def convert_sourceport_to_string(decimal_list):
 
 def main():
     print("Packet Sniffer Started")
-    pcap_file_name = receiver_tcp("192.168.30.129", 5443)
+    dst_ip = "192.168.30.129"
+    pcap_file_name = receiver_tcp(dst_ip, 5443)
     decimal_list, expected_amount_of_packets, amount_of_packets_received = read_pcap_file(pcap_file_name)
     ascii_string = convert_sourceport_to_string(decimal_list)
 
