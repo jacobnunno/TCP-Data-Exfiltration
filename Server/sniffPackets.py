@@ -34,6 +34,7 @@ def read_pcap_file(pcap_file):
     decimal_list = []
     line_counter = 0
     amount_of_incoming_packets = 0
+    victim_unique_identifier = 0
 
     #Go through the file line by line
     for i in lines:
@@ -41,7 +42,7 @@ def read_pcap_file(pcap_file):
         if line_counter < 10:
             print(i)
         #extract the source port with the use of regex
-        if line_counter != 0 and line_counter != 1 and line_counter != len(lines):
+        if line_counter != 0 and line_counter != 1 and line_counter != 2 and line_counter != len(lines):
             substring = "TCP Retransmission"
             if substring in i:
                 #if it is a retransmission
@@ -56,13 +57,16 @@ def read_pcap_file(pcap_file):
                 if tcp_source_port != "32768":
                     decimal_list.append(tcp_source_port)
         elif line_counter == 1:
-            #if it is the second packet, then we know that it is the amount of packets to be sent
+            #if it is the second packet then it is the victim machine unique identifier
+            result = re.search('TCP 60 (.*) →', i)
+            victim_unique_identifier = result.group(1)
+        elif line_counter == 2:
+            #if it is the third packet, then we know that it is the amount of packets to be sent
             result = re.search('TCP 60 (.*) →', i)
             amount_of_incoming_packets = result.group(1)
-            is_first_packet = 1
         line_counter += 1
     # subtract 3 for the first and last and the expected amount packet
-    return decimal_list, amount_of_incoming_packets, line_counter - 3
+    return decimal_list, amount_of_incoming_packets, line_counter - 4, victim_unique_identifier
 
 def receiver_tcp(tcp_ip, tcp_port, echo=True, buffer_size=4096):
     src_ip = "192.168.30.128"
@@ -116,7 +120,7 @@ def main():
     print("Packet Sniffer Started")
     dst_ip = "192.168.30.129"
     pcap_file_name = receiver_tcp(dst_ip, 5443)
-    decimal_list, expected_amount_of_packets, amount_of_packets_received = read_pcap_file(pcap_file_name)
+    decimal_list, expected_amount_of_packets, amount_of_packets_received, victim_unique_identifier = read_pcap_file(pcap_file_name)
     ascii_string = convert_sourceport_to_string(decimal_list)
 
     #print results
@@ -124,6 +128,7 @@ def main():
     print("Actual amount of packets: {}".format(amount_of_packets_received))
     if int(expected_amount_of_packets) != int(amount_of_packets_received):
         print("Expected amount and actual amount differ.  Packets have been lost.")
+    print("Unique Identifier for the file from the victim machine: {}".format(victim_unique_identifier))
     print("Data Received:")
     print(ascii_string)
 

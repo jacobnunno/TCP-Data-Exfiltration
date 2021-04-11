@@ -5,6 +5,7 @@ from scapy.all import *
 import codecs
 import sys
 import time
+import random
 
 def file_to_decimal(filename):
     fname = filename
@@ -70,12 +71,17 @@ def main():
     #initial packet sent with port 32768 to signal the start of the data transfer
     send_packet(sourceIP, destinationIP, 32768)
 
-    #second packet sent with port set to the amount of packets being sent
+    #second packet with the unique identifier for this machine as the source port
+    #currently we generate random port number between 32768 and 65535 as a unique ID
+    unique_ID = random.randint(32769 , 65534)
+    send_packet(sourceIP, destinationIP, unique_ID)
+
+    #third packet sent with port set to the amount of packets being sent
     length_of_decimal = int(len(list_of_decimal))
     send_packet(sourceIP, destinationIP, length_of_decimal)
     
     #loop through and send packets, pause every 3rd packet
-    packet_counter = 2
+    packet_counter = 3
     for i in list_of_decimal:
         #create and send the packets one by one
         send_packet(sourceIP, destinationIP, int(i))
