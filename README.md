@@ -39,6 +39,7 @@ Download the GitHub repository:
 https://github.com/jacobnunno/TCP-Data-Exfiltration
 
 There are two folders within the GitHub repository: Server and Victim. Each folder should be moved to the correct machine. Now we must set up the proper settings to send and receive the packets. Edit both sendPacket.py and sniffPackets.py and change these variables to match your machine’s information:
+
 sendPacket.py
 
 main()
